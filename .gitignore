@@ -1,0 +1,39 @@
+# Node.js .gitignore file
+# 忽略 node_modules 目录，因为依赖项应该通过 package.json 和 package-lock.json 来管理
+node_modules/
+
+# 忽略构建输出
+dist/
+build/
+
+# 忽略日志文件
+logs/
+*.log
+npm-debug.log*
+yarn*.log*
+
+# 忽略临时文件
+*.tmp
+
+# 忽略本地环境配置文件
+.env
+.env.*
+!.env.production
+
+# 忽略 IDE 和编辑器文件
+.vscode/
+.idea/
+.project
+.classpath
+*.sbt
+*.swp
+*.nyc_output
+.npm/
+.npmrc
+.yarn/
+.yarnrc
+.yarnrc.yml
+
+# 忽略系统文件
+.DS_Store
+Thumbs.db
