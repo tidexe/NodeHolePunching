@@ -36,14 +36,24 @@ async function tcpPunching(device_id, peer_device_id, local_port) {
     console.log('打洞成功，连接建立');
     socket.on('data', (data) => console.log('接收到数据:', data.toString()));
   });
-  server.listen(local_port);
+  server.listen(local_port, () => {
+    console.log(`本地服务器正在监听端口 ${local_port}`);
+  });
 
   // 同时尝试连接对方
   const client = new net.Socket();
-  client.connect(peer_port, peer_ip, () => {
+  client.on('connect', () => {
     console.log(`连接到对方 ${peer_ip}:${peer_port}`);
     client.write('Hello from client');
   });
+  client.on('error', (error) => {
+    console.error('连接失败:', error);
+  });
+  client.on('timeout', () => {
+    console.error('连接超时');
+  });
+  client.setTimeout(5000); // 设置连接超时时间为5秒
+  client.connect(peer_port, peer_ip);
 }
 
 // 运行客户端和无公网服务器
