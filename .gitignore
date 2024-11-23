@@ -1,6 +1,7 @@
 # Node.js .gitignore file
 # 忽略 node_modules 目录，因为依赖项应该通过 package.json 和 package-lock.json 来管理
 node_modules/
+text
 
 # 忽略构建输出
 dist/

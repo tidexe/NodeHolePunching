@@ -10,7 +10,14 @@ const options = {
 };
 
 const server = https.createServer(options, app);
-const io = socketIo(server, { cors: { origin: '*' } });
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['my-custom-header'],
+    credentials: true
+  }
+});
 
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);
