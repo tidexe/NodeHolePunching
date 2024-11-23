@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Receiver</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; }
+    div { text-align: center; }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Waiting for file...</h1>
+    <a id="downloadLink" style="display: none;">Download File</a>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/simple-peer@latest/simplepeer.min.js"></script>
+  <script>
+    const socket = io('https://localhost:3000');
+    let peer;
+    let filename;
+
+    socket.on('signal', ({ sender, signal }) => {
+      if (!peer) {
+        peer = new SimplePeer({
+          initiator: false,
+          trickle: false,
+        });
+
+        peer.on('signal', data => {
+          socket.emit('signal', { target: sender, signal: data });
+        });
+
+        peer.on('connect', () => {
+          console.log('Connected to peer!');
+        });
+
+        peer.signal(signal);
+      } else {
+        peer.signal(signal);
+      }
+    });
+
+    peer.on('data', chunk => {
+      if (typeof chunk === 'string') {
+        const metadata = JSON.parse(chunk);
+        if (metadata.type === 'filename') {
+          filename = metadata.payload;
+        }
+      } else {
+        receiveChunk(chunk);
+      }
+    });
+
+    let chunks = [];
+    function receiveChunk(chunk) {
+      chunks.push(chunk);
+      if (peer.bufferedAmount === 0) {
+        assembleChunks();
+      }
+    }
+
+    function assembleChunks() {
+      const blob = new Blob(chunks, { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.getElementById('downloadLink');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'block';
+      a.textContent = `Download ${filename}`;
+      chunks = [];
+    }
+  </script>
+</body>
+</html>
+
+
+

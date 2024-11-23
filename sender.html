@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Sender</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; }
+    input, button { padding: 10px; margin: 5px; }
+  </style>
+</head>
+<body>
+  <div>
+    <input type="file" id="fileInput" />
+    <button onclick="sendFile()">Send File</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/simple-peer@latest/simplepeer.min.js"></script>
+  <script>
+    const socket = io('https://hcss.tidex.zone:3000');
+    let peer;
+
+    document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      sendFile(file);
+    }
+
+    async function createPeerConnection() {
+      return new Promise((resolve) => {
+        peer = new SimplePeer({
+          initiator: true,
+          trickle: false,
+        });
+
+        peer.on('signal', data => {
+          socket.emit('signal', { target: receiverId.value, signal: data });
+        });
+
+        peer.on('connect', () => resolve(peer));
+      });
+    }
+
+    async function sendFile(file) {
+      const peer = await createPeerConnection();
+
+      peer.on('data', data => {
+        console.log('Data received:', data.toString());
+      });
+
+      peer.send(JSON.stringify({ type: 'filename', payload: file.name }));
+      peer.write(file);
+    }
+  </script>
+</body>
+</html>
+
+
+
