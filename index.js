@@ -17,18 +17,25 @@ io.on('connection', (socket) => {
 
   socket.on('signal', ({ target, signal }) => {
     if (target) {
+      console.log(`Received signal from ${socket.id} to ${target}:`, signal);
       io.to(target).emit('signal', { sender: socket.id, signal });
+      console.log(`Forwarded signal from ${socket.id} to ${target}`);
+    } else {
+      console.warn(`No target specified in signal from ${socket.id}`);
     }
   });
 
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
   });
+
+  socket.on('error', (err) => {
+    console.error(`Error on client ${socket.id}:`, err);
+  });
 });
 
 server.listen(3000, () => {
   console.log('Signal server is running on port 3000 using HTTPS');
 });
-
 
 
